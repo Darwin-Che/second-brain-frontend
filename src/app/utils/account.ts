@@ -1,0 +1,14 @@
+// Utility to fetch account info from backend
+export async function fetchAccount(): Promise<any | null> {
+  try {
+    const res = await fetch("http://localhost:4000/api/v1/account", {
+      credentials: "include",
+    });
+    if (res.status === 401) return null;
+    if (!res.ok) throw new Error("Failed to fetch account");
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    return null;
+  }
+}

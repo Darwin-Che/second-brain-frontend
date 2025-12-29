@@ -1,65 +1,226 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState, useEffect } from "react";
+import TopTabAppBar from "./components/TopTabAppBar";
+import Dialog from "@mui/material/Dialog";
+import LoginDialogContent from "./components/LoginDialogContent";
+import { useAuth } from "./context/AuthContext";
+import { useRouter, usePathname } from "next/navigation";
+
+import Button from "@mui/material/Button";
+import {
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  styled,
+  TextField,
+  Typography,
+} from "@mui/material";
+
+export function Experiment() {
+  return <Button variant="contained">Hello world</Button>;
+}
+
+const PaperV1 = styled(Paper)(({ theme }) => ({
+  width: 120,
+  height: 120,
+  padding: theme.spacing(2),
+  square: false,
+  variant: "outlined",
+  ...theme.typography.body2,
+  textAlign: "center",
+}));
+
+function CurrentComponentBUSY() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Card variant="outlined">
+      <CardContent>
+        <Stack spacing={5} padding={2}>
+          <Stack direction="row" spacing={2}>
+            <Typography variant="h6" sx={{ flex: 1 }}>
+              BUSY: TASK
+            </Typography>
+            <Typography variant="h6" sx={{ flex: 1, textAlign: "right" }}>
+              {new Date().toLocaleTimeString()}
+            </Typography>
+          </Stack>
+          <TextField
+            id="filled-multiline-static"
+            label="Notes"
+            multiline
+            minRows={3}
+            defaultValue=""
+            variant="filled"
+          />
+        </Stack>
+      </CardContent>
+    </Card>
   );
 }
+
+function CurrentComponentIdle() {
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Stack spacing={2}>
+          <Typography variant="h6">IDLE since 5pm for 30min</Typography>
+
+          <FormControl>
+            <InputLabel id="current-display-idle-form-task-label">
+              Task
+            </InputLabel>
+            <Select
+              labelId="current-display-idle-form-task-label"
+              autoWidth
+              label="Age"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={21}>Twenty one</MenuItem>
+              <MenuItem value={22}>Twenty one and a half</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Stack direction="row" spacing={2}>
+            <FormControl>
+              <TextField
+                id="filled-search"
+                label="Search field"
+                type="search"
+                variant="filled"
+              />
+            </FormControl>
+            <Typography variant="body1">Till 3PM</Typography>
+          </Stack>
+        </Stack>
+      </CardContent>
+      <CardActions sx={{ justifyContent: "center" }}>
+        <Button size="large" variant="contained">
+          Start
+        </Button>
+      </CardActions>
+    </Card>
+  );
+}
+
+function CurrentComponent() {
+  // Possible Status: "BUSY", "IDLE"
+  const status: String = "IDLE";
+  switch (status) {
+    case "BUSY":
+      return CurrentComponentBUSY();
+    case "IDLE":
+      return CurrentComponentIdle();
+    default:
+      return <div>Error loading current process.</div>;
+  }
+}
+
+function HistoryItem() {
+  return (
+    <Stack direction="row" spacing={2}>
+      <Typography variant="body1">Task Name</Typography>
+      <Typography variant="body1">Start Time</Typography>
+      <Typography variant="body1">End Time</Typography>
+    </Stack>
+  );
+}
+
+function HistoryComponent() {
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6">History</Typography>
+        <Stack spacing={2}>
+          <HistoryItem />
+          <HistoryItem />
+          <HistoryItem />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function Page() {
+  const { account, loading, refresh } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const tab = pathname === "/account" ? 1 : 0;
+
+  useEffect(() => {
+    if (!loading) {
+      setLoginOpen(!account);
+    }
+  }, [account, loading]);
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:4000/auth/google";
+  };
+
+  return (
+    <>
+      <TopTabAppBar
+        tab={tab}
+        onTabChange={(_, v) => {
+          if (v === 0) router.push("/");
+          if (v === 1) router.push("/account");
+        }}
+      />
+      <Dialog open={loginOpen} disableEscapeKeyDown onClose={() => {}}>
+        <LoginDialogContent onGoogleLogin={handleGoogleLogin} />
+      </Dialog>
+      <main>
+        <Stack spacing={2}>
+          <CurrentComponent />
+          <HistoryComponent />
+        </Stack>
+      </main>
+    </>
+  );
+}
+
+/*
+<main style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
+<Experiment />
+
+{activeTask && (
+	<section style={{ marginBottom: 32 }}>
+		<h2>Active Task</h2>
+		<div>
+			<strong>{activeTask.project.name}</strong>
+			<div>
+				Time left: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}
+			</div>
+			<button onClick={endTask} style={{ marginTop: 8 }}>
+				End Early
+			</button>
+		</div>
+	</section>
+)}
+
+History
+<section>
+	<h2>History</h2>
+	<ul>
+		{history.map((h, idx) => (
+			<li key={idx}>
+				{h.project.name} | {new Date(h.start).toLocaleTimeString()} - {new Date(h.end).toLocaleTimeString()} | {Math.floor(h.duration / 60)}:{String(h.duration % 60).padStart(2, "0")}
+			</li>
+		))}
+	</ul>
+</section>
+</main>
+*/
