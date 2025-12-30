@@ -14,6 +14,7 @@ import {
 import { NumberSpinner } from './NumberSpinner';
 import { useAuth } from "../context/AuthContext";
 import { getApiUrl } from "../utils/api";
+import { authFetch } from "../utils/authFetch";
 
 interface RecommendedTask {
     task_name: string;
@@ -124,13 +125,11 @@ export default function CurrentComponentIdle({ onSessionStarted, brainState }: C
             try {
                 setLoading(true);
                 setError(null);
-                const response = await fetch(getApiUrl("/api/v1/tasks/recommend"), {
+                const response = await authFetch(getApiUrl("/api/v1/tasks/recommend"), {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                     },
-                    credentials: "include",
                     signal: abortController.signal,
                 });
 
@@ -164,13 +163,11 @@ export default function CurrentComponentIdle({ onSessionStarted, brainState }: C
         setError(null);
 
         try {
-            const response = await fetch(getApiUrl("/api/v1/start_session"), {
+            const response = await authFetch(getApiUrl("/api/v1/start_session"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                credentials: "include",
                 body: JSON.stringify({
                     task_name: selectedTask,
                     end_ts: cachedEndTimeISO,

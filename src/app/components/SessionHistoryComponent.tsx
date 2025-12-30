@@ -1,4 +1,5 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useAuth } from "../context/AuthContext";
 import {
   Stack,
   Typography,
@@ -10,6 +11,7 @@ import {
   TableContainer,
 } from "@mui/material";
 import { getApiUrl } from "../utils/api";
+import { authFetch } from "../utils/authFetch";
 
 interface Session {
   task_name: string;
@@ -29,13 +31,11 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
   const fetchSessionHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch(getApiUrl("/api/v1/session_history"), {
+      const response = await authFetch(getApiUrl("/api/v1/session_history"), {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
-        credentials: "include",
       });
 
       if (!response.ok) {
@@ -52,9 +52,11 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
     }
   };
 
+  const { account } = useAuth();
+
   useEffect(() => {
     fetchSessionHistory();
-  }, []);
+  }, [account]);
 
   useImperativeHandle(ref, () => ({
     refresh: () => {

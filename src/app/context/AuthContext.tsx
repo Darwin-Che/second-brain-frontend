@@ -1,3 +1,5 @@
+"use client";
+
 import React, {
   createContext,
   useContext,
@@ -7,6 +9,7 @@ import React, {
 } from "react";
 import { fetchAccount } from "../utils/account";
 import { logoutAccount } from "../utils/logout";
+import { setAccessToken } from "../utils/authFetch";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
@@ -28,15 +31,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   };
 
+  const router = useRouter();
+
   useEffect(() => {
     load();
-  }, []);
+
+    // Listen for OAuth postMessage from popup window
+    const handler = async (ev: MessageEvent) => {
+      // Expect messages like { type: 'oauth', access_token: '...' }
+      try {
+        console.debug("AuthContext message event received", ev?.data);
+        if (!ev.data || typeof ev.data !== "object") return;
+        if (ev.data.type === "oauth" && ev.data.access_token) {
+          console.debug("AuthContext received access_token via postMessage", {
+            has_token: !!ev.data.access_token,
+          });
+          try {
+            setAccessToken(ev.data.access_token);
+          } catch (e) {
+            console.error("Error setting access token in AuthContext", e);
+          }
+          // reload account into context and then do an SPA refresh so any login dialog closes
+          await load();
+          try {
+            // Force a full page reload to ensure all components pick up new auth state
+            if (typeof window !== "undefined") window.location.reload();
+          } catch (e) {
+            // ignore
+          }
+        }
+      } catch (e) {
+        console.error("Error handling auth message event", e);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("message", handler);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("message", handler);
+      }
+    };
+  }, [router]);
 
   const refresh = load;
-  const router =
-    typeof window !== "undefined"
-      ? require("next/navigation").useRouter()
-      : null;
   const logout = async () => {
     await logoutAccount();
     setAccount(null);

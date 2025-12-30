@@ -11,6 +11,7 @@ import {
   Box,
 } from "@mui/material";
 import { getApiUrl } from "../utils/api";
+import { authFetch } from "../utils/authFetch";
 
 interface WorkSession {
   task_name: string;
@@ -62,16 +63,14 @@ export default function CurrentComponentBusy({ onSessionEnded, onSessionEndedRef
       setNotesSaveError(null);
       
       try {
-        const response = await fetch(getApiUrl("/api/v1/update_notes"), {
+        const response = await authFetch(getApiUrl("/api/v1/update_notes"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
           body: JSON.stringify({
             notes: notes.trim(),
           }),
-          credentials: "include",
         });
 
         if (!response.ok) {
@@ -139,14 +138,12 @@ export default function CurrentComponentBusy({ onSessionEnded, onSessionEndedRef
     setError(null);
 
     try {
-      const response = await fetch(getApiUrl("/api/v1/end_session"), {
+      const response = await authFetch(getApiUrl("/api/v1/end_session"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify({}),
-        credentials: "include",
       });
 
       if (!response.ok) {

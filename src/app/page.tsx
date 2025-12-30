@@ -9,6 +9,7 @@ import LoginDialogContent from "./components/LoginDialogContent";
 import { useAuth } from "./context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { getApiUrl } from "./utils/api";
+import { authFetch } from "./utils/authFetch";
 
 import Button from "@mui/material/Button";
 import {
@@ -34,20 +35,18 @@ function CurrentComponent({ onSessionHistoryRefresh }: { onSessionHistoryRefresh
     const fetchBrainState = async () => {
       try {
         setLoading(true);
-        const response = await fetch(getApiUrl("/api/v1/brain/state"), {
+        const response = await authFetch(getApiUrl("/api/v1/brain/state"), {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
-          credentials: "include",
         });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch brain state: ${response.statusText}`);
         }
 
-        const data = await response.json();
+  const data = await response.json();
         setBrainState(data.brain_state);
       } catch (err) {
         console.error("Error fetching brain state:", err);
@@ -110,7 +109,8 @@ export default function Page() {
   }, [account, loading]);
 
   const handleGoogleLogin = () => {
-    window.location.href = getApiUrl("/auth/google");
+  // Open OAuth in a new tab so network traces are visible.
+  window.open(getApiUrl("/auth/google"), "_blank");
   };
 
   const handleSessionHistoryRefresh = () => {

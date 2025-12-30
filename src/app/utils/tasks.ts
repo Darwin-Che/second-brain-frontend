@@ -5,21 +5,19 @@ export interface Task {
   hours_per_week: number;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+import { getApiUrl } from "./api";
+import { authFetch } from "./authFetch";
 
 export async function fetchTasks(): Promise<Task[]> {
-  const res = await fetch(`${API_URL}/api/v1/tasks`, {
-    credentials: "include",
-  });
+  const res = await authFetch(getApiUrl("/api/v1/tasks"));
   if (!res.ok) throw new Error("Failed to fetch tasks");
   return res.json();
 }
 
 export async function addTask(task: Task): Promise<void> {
-  const res = await fetch(`${API_URL}/api/v1/tasks/add`, {
+  const res = await authFetch(getApiUrl("/api/v1/tasks/add"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(task),
   });
   if (!res.ok) {
@@ -33,10 +31,9 @@ export async function addTask(task: Task): Promise<void> {
 }
 
 export async function editTask(task: Task): Promise<void> {
-  const res = await fetch(`${API_URL}/api/v1/tasks/edit`, {
+  const res = await authFetch(getApiUrl("/api/v1/tasks/edit"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(task),
   });
   if (!res.ok) {
