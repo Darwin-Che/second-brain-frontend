@@ -12,9 +12,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import AddIcon from "@mui/icons-material/Add";
 import { useAuth } from "../context/AuthContext";
 import { fetchTasks, addTask, editTask, Task as ApiTask } from "../utils/tasks";
 import { useRouter } from "next/navigation";
@@ -23,6 +21,13 @@ interface Task {
   task_name: string;
   hours_per_week: number;
 }
+
+// Hours per week options: 0-5 step 0.5, 5-10 step 1, 10-40 step 2
+const HOURS_PER_WEEK_OPTIONS = [
+  0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5,
+  6, 7, 8, 9, 10,
+  12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40
+];
 
 const AccountPage: React.FC = () => {
   const { account, logout } = useAuth();
@@ -75,7 +80,7 @@ const AccountPage: React.FC = () => {
         { task_name: newTaskName.trim(), hours_per_week: newTaskHours },
       ]);
       setNewTaskName("");
-      setNewTaskHours(0.5);
+      setNewTaskHours(0);
       setError(null);
     } catch (err: any) {
       setError(err?.message || "Failed to add task");
@@ -85,171 +90,112 @@ const AccountPage: React.FC = () => {
   };
 
   return (
-    <Stack spacing={2} maxWidth={600} margin="32px auto">
-      <Card variant="outlined" sx={{ width: "100%", maxWidth: 600 }}>
-        <CardContent>
-          <Typography variant="h4" gutterBottom>
-            Account
-          </Typography>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography variant="h6">{account?.name}</Typography>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => {
-                logout();
-                router.push("/");
-              }}
-            >
-              Log out
-            </Button>
-          </Stack>
-        </CardContent>
-      </Card>
-      <Card variant="outlined" sx={{ width: "100%", maxWidth: 600 }}>
-        <CardContent>
-          <Typography variant="subtitle1" color="textSecondary">
-            Manage Tasks
-          </Typography>
-          <TableContainer component={Paper} variant="outlined">
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ width: "66.66%" }}>Task Name</TableCell>
-                  <TableCell sx={{ width: "33.33%" }}>Hours/Week</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tasks.map((task, idx) => (
-                  <TableRow key={task.task_name}>
-                    <TableCell sx={{ width: "66.66%" }}>
-                      <TextField
-                        value={task.task_name}
-                        size="small"
-                        fullWidth
-                        disabled
-                      />
-                    </TableCell>
-                    <TableCell sx={{ width: "33.33%" }}>
-                      <Select
-                        value={task.hours_per_week}
-                        onChange={(e) =>
-                          handleTaskHoursChange(idx, Number(e.target.value))
-                        }
-                        size="small"
-                        fullWidth
-                        displayEmpty
-                        sx={{ minWidth: 80 }}
-                        disabled={loading}
-                      >
-                        {/* 0.5 to 5, step 0.5 */}
-                        {Array.from(
-                          { length: 10 },
-                          (_, i) => 0.5 + i * 0.5,
-                        ).map((val) => (
-                          <MenuItem key={val} value={val}>
-                            {val}
-                          </MenuItem>
-                        ))}
-                        {/* 6 to 10, step 1 */}
-                        {Array.from({ length: 5 }, (_, i) => 5 + (i + 1)).map(
-                          (val) => (
-                            <MenuItem key={val} value={val}>
-                              {val}
-                            </MenuItem>
-                          ),
-                        )}
-                        {/* 12 to 20, step 2 */}
-                        {Array.from(
-                          { length: 5 },
-                          (_, i) => 10 + (i + 1) * 2,
-                        ).map((val) => (
-                          <MenuItem key={val} value={val}>
-                            {val}
-                          </MenuItem>
-                        ))}
-                        {/* 25 to 40, step 5 */}
-                        {Array.from(
-                          { length: 4 },
-                          (_, i) => 20 + (i + 1) * 5,
-                        ).map((val) => (
-                          <MenuItem key={val} value={val}>
-                            {val}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Stack direction="row" spacing={2} alignItems="center" mt={2}>
-            <TextField
-              label="Task name"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              size="small"
-              fullWidth
-              disabled={loading}
-            />
-            <Select
-              value={newTaskHours}
-              onChange={(e) => setNewTaskHours(Number(e.target.value))}
-              size="small"
-              sx={{ minWidth: 80 }}
-              disabled={loading}
-            >
-              {/* 0.5 to 5, step 0.5 */}
-              {Array.from({ length: 10 }, (_, i) => 0.5 + i * 0.5).map(
-                (val) => (
-                  <MenuItem key={val} value={val}>
-                    {val}
-                  </MenuItem>
-                ),
-              )}
-              {/* 6 to 10, step 1 */}
-              {Array.from({ length: 5 }, (_, i) => 5 + (i + 1)).map((val) => (
-                <MenuItem key={val} value={val}>
-                  {val}
-                </MenuItem>
-              ))}
-              {/* 12 to 20, step 2 */}
-              {Array.from({ length: 5 }, (_, i) => 10 + (i + 1) * 2).map(
-                (val) => (
-                  <MenuItem key={val} value={val}>
-                    {val}
-                  </MenuItem>
-                ),
-              )}
-              {/* 25 to 40, step 5 */}
-              {Array.from({ length: 4 }, (_, i) => 20 + (i + 1) * 5).map(
-                (val) => (
-                  <MenuItem key={val} value={val}>
-                    {val}
-                  </MenuItem>
-                ),
-              )}
-            </Select>
-            <Button
-              onClick={handleAddTask}
-              variant="outlined"
-              disabled={loading || !newTaskName.trim()}
-            >
-              Add Task
-            </Button>
-          </Stack>
-          {error && (
-            <Typography color="error" mt={1}>
-              {error}
+    <Stack spacing={3}>
+      {/* Account Section */}
+      <Stack spacing={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack spacing={0.5}>
+            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              {account?.name}
             </Typography>
-          )}
-        </CardContent>
-      </Card>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              {account?.email}
+            </Typography>
+          </Stack>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              logout();
+              router.push("/");
+            }}
+          >
+            Logout
+          </Button>
+        </Stack>
+      </Stack>
+
+      {/* Tasks Section */}
+      <Stack spacing={2}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Tasks
+        </Typography>
+
+        {/* Tasks Table */}
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600, width: "66%" }}>Task Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, width: "34%" }}>Hrs / Wk</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tasks.map((task, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{task.task_name}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={task.hours_per_week}
+                      onChange={(e) =>
+                        handleTaskHoursChange(idx, e.target.value as number)
+                      }
+                      disabled={loading}
+                      size="small"
+                      fullWidth
+                    >
+                      {HOURS_PER_WEEK_OPTIONS.map((hours) => (
+                        <MenuItem key={hours} value={hours}>
+                          {hours}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Add Task Form */}
+        <Stack direction="row" spacing={2} sx={{ alignItems: "flex-end" }}>
+          <TextField
+            label="Task Name (Can't Change)"
+            value={newTaskName}
+            onChange={(e) => setNewTaskName(e.target.value)}
+            disabled={loading}
+            sx={{ width: "66%" }}
+            size="small"
+          />
+          <Select
+            value={newTaskHours}
+            onChange={(e) => setNewTaskHours(e.target.value as number)}
+            disabled={loading}
+            sx={{ width: "34%", minWidth: "100px" }}
+            size="small"
+          >
+            {HOURS_PER_WEEK_OPTIONS.map((hours) => (
+              <MenuItem key={hours} value={hours}>
+                {hours}
+              </MenuItem>
+            ))}
+          </Select>
+          <Button
+            variant="contained"
+            onClick={handleAddTask}
+            disabled={loading}
+            sx={{ ml: "auto", height: "40px", minWidth: "40px", padding: 0 }}
+          >
+            <AddIcon />
+          </Button>
+        </Stack>
+
+        {error && (
+          <Typography color="error" variant="body2">
+            {error}
+          </Typography>
+        )}
+      </Stack>
     </Stack>
   );
 };

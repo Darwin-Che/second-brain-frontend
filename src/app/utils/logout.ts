@@ -1,7 +1,9 @@
 // Utility to call backend logout endpoint
+import { getApiUrl } from "./api";
+
 export async function logoutAccount(): Promise<boolean> {
   try {
-    const res = await fetch("http://localhost:4000/api/v1/account/logout", {
+    const res = await fetch(getApiUrl("/api/v1/account/logout"), {
       method: "POST",
       credentials: "include",
     });

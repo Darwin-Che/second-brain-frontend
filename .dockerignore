@@ -1,0 +1,12 @@
+.git
+.gitignore
+.next
+.env.local
+node_modules
+npm-debug.log
+.DS_Store
+.vscode
+.idea
+*.swp
+*.swo
+*~

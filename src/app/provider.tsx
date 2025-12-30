@@ -2,16 +2,8 @@
 
 import { ThemeProvider, CssBaseline, Box, createTheme } from "@mui/material";
 import { AuthProvider } from "./context/AuthContext";
-import { red } from "@mui/material/colors";
 
-const theme = createTheme({
-  spacing: 4,
-  palette: {
-    primary: {
-      main: red[500],
-    },
-  },
-});
+const theme = createTheme();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -20,7 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <Box
           sx={{
-            maxWidth: 390,
+            maxWidth: 400,
             mx: "auto",
             minHeight: "100vh",
           }}
