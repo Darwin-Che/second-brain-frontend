@@ -125,7 +125,7 @@ export default function CurrentComponentIdle({ onSessionStarted, brainState }: C
             try {
                 setLoading(true);
                 setError(null);
-                const response = await authFetch(getApiUrl("/api/v1/tasks/recommend"), {
+                const response = await authFetch("/api/v1/tasks/recommend", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -163,7 +163,7 @@ export default function CurrentComponentIdle({ onSessionStarted, brainState }: C
         setError(null);
 
         try {
-            const response = await authFetch(getApiUrl("/api/v1/start_session"), {
+            const response = await authFetch("/api/v1/start_session", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

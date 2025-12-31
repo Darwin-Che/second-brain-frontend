@@ -35,7 +35,7 @@ function CurrentComponent({ onSessionHistoryRefresh }: { onSessionHistoryRefresh
     const fetchBrainState = async () => {
       try {
         setLoading(true);
-        const response = await authFetch(getApiUrl("/api/v1/brain/state"), {
+        const response = await authFetch("/api/v1/brain/state", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -46,7 +46,7 @@ function CurrentComponent({ onSessionHistoryRefresh }: { onSessionHistoryRefresh
           throw new Error(`Failed to fetch brain state: ${response.statusText}`);
         }
 
-  const data = await response.json();
+        const data = await response.json();
         setBrainState(data.brain_state);
       } catch (err) {
         console.error("Error fetching brain state:", err);
@@ -79,7 +79,7 @@ function CurrentComponent({ onSessionHistoryRefresh }: { onSessionHistoryRefresh
   switch (brainState.brain_status) {
     case "busy":
       return (
-        <CurrentComponentBusy 
+        <CurrentComponentBusy
           onSessionEnded={handleSessionEnded}
           onSessionEndedRefresh={onSessionHistoryRefresh}
           brainState={brainState}
@@ -109,8 +109,8 @@ export default function Page() {
   }, [account, loading]);
 
   const handleGoogleLogin = () => {
-  // Open OAuth in a new tab so network traces are visible.
-  window.open(getApiUrl("/auth/google"), "_blank");
+    // Open OAuth in a new tab so network traces are visible.
+    window.open(getApiUrl("/auth/google"), "_blank");
   };
 
   const handleSessionHistoryRefresh = () => {

@@ -31,7 +31,7 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
   const fetchSessionHistory = async () => {
     try {
       setLoading(true);
-      const response = await authFetch(getApiUrl("/api/v1/session_history"), {
+  const response = await authFetch("/api/v1/session_history", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

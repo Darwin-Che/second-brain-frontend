@@ -1,11 +1,8 @@
+
 # Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-
-# Accept build args for Next.js public variables
-ARG NEXT_PUBLIC_API_URL=http://localhost:4000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 # Copy package files
 COPY package.json package-lock.json ./
@@ -15,6 +12,10 @@ RUN npm ci
 
 # Copy source code
 COPY . .
+
+# Allow passing BACKEND_URL at build time (optional)
+ARG BACKEND_URL
+ENV BACKEND_URL=${BACKEND_URL}
 
 # Build Next.js app
 RUN npm run build
@@ -46,5 +47,11 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# Allow passing BACKEND_URL at runtime (overrides build ARG)
+ENV BACKEND_URL=${BACKEND_URL}
 
 CMD ["npm", "start"]
+
+# Usage:
+#   docker build --build-arg BACKEND_URL=https://your-backend ...
+#   docker run -e BACKEND_URL=https://your-backend ...

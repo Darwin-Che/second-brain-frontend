@@ -63,7 +63,7 @@ export default function CurrentComponentBusy({ onSessionEnded, onSessionEndedRef
       setNotesSaveError(null);
       
       try {
-        const response = await authFetch(getApiUrl("/api/v1/update_notes"), {
+  const response = await authFetch("/api/v1/update_notes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -138,7 +138,7 @@ export default function CurrentComponentBusy({ onSessionEnded, onSessionEndedRef
     setError(null);
 
     try {
-      const response = await authFetch(getApiUrl("/api/v1/end_session"), {
+  const response = await authFetch("/api/v1/end_session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -9,13 +9,13 @@ import { getApiUrl } from "./api";
 import { authFetch } from "./authFetch";
 
 export async function fetchTasks(): Promise<Task[]> {
-  const res = await authFetch(getApiUrl("/api/v1/tasks"));
+  const res = await authFetch("/api/v1/tasks");
   if (!res.ok) throw new Error("Failed to fetch tasks");
   return res.json();
 }
 
 export async function addTask(task: Task): Promise<void> {
-  const res = await authFetch(getApiUrl("/api/v1/tasks/add"), {
+  const res = await authFetch("/api/v1/tasks/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(task),

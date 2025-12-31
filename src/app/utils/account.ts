@@ -4,7 +4,7 @@ import { authFetch } from "./authFetch";
 
 export async function fetchAccount(): Promise<any | null> {
   try {
-    const url = getApiUrl("/api/v1/account");
+    const url = "/api/v1/account";
     console.debug("fetchAccount: requesting account", { url });
     const res = await authFetch(url);
     console.debug("fetchAccount: response", { status: res.status, ok: res.ok });

@@ -54,6 +54,15 @@ async function doRefresh(): Promise<string | null> {
 }
 
 export async function authFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  // If caller passed a string path like '/api/...' or 'api/...', normalize it
+  // to a same-origin path handled by getApiUrl. If input is a Request or an
+  // absolute URL, leave it unchanged.
+  if (typeof input === 'string') {
+    // treat bare paths (starting with / or not) as app-local API routes
+    if (!/^https?:\/\//i.test(input) && !input.startsWith('http')) {
+      input = getApiUrl(input);
+    }
+  }
   // Ensure we have an access token in memory. If not, attempt a refresh
   if (!inMemoryAccessToken) {
     console.debug("authFetch: no in-memory token, attempting refresh before request");
