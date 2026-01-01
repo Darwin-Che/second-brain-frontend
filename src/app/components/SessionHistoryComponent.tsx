@@ -9,14 +9,17 @@ import {
   TableRow,
   TableCell,
   TableContainer,
+  Dialog,
 } from "@mui/material";
 import { getApiUrl } from "../utils/api";
 import { authFetch } from "../utils/authFetch";
 
 interface Session {
+  id: string;
   task_name: string;
   start_ts: string;
   end_ts: string;
+  notes?: string;
 }
 
 export interface SessionHistoryComponentHandle {
@@ -27,6 +30,60 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [editDuration, setEditDuration] = useState(0); // in minutes
+  const [editNotes, setEditNotes] = useState("");
+  // Helper to open dialog with session info
+  const handleRowClick = (session: Session) => {
+    setSelectedSession(session);
+    // Calculate duration in minutes
+    const start = new Date(session.start_ts);
+    const end = new Date(session.end_ts);
+    setEditDuration(Math.round((end.getTime() - start.getTime()) / 60000));
+    setEditNotes(session.notes || "");
+    setDialogOpen(true);
+  };
+
+  // Helper to handle dialog save
+  const handleDialogSave = async () => {
+    if (!selectedSession) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // Calculate new end_ts based on new duration
+      const start = new Date(selectedSession.start_ts);
+      const newEnd = new Date(start.getTime() + editDuration * 60000);
+      const payload = {
+        id: selectedSession.id,
+        changes: {
+          duration: editDuration,
+          notes: editNotes,
+        },
+      };
+      const response = await authFetch("/api/v1/session_update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update session: ${response.statusText}`);
+      }
+      // Refresh session history
+      await fetchSessionHistory();
+      setDialogOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update session");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
 
   const fetchSessionHistory = async () => {
     try {
@@ -136,7 +193,7 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
               </TableRow>
             ) : (
               sessions.map((session, idx) => (
-                <TableRow key={idx}>
+                <TableRow key={session.id || idx} hover style={{ cursor: "pointer" }} onClick={() => handleRowClick(session)}>
                   <TableCell>{session.task_name}</TableCell>
                   <TableCell>{formatTime(session.start_ts)}</TableCell>
                   <TableCell>{calculateDuration(session.start_ts, session.end_ts)}</TableCell>
@@ -146,6 +203,38 @@ const SessionHistoryComponent = forwardRef<SessionHistoryComponentHandle>(functi
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Edit Dialog */}
+      <Dialog open={dialogOpen} onClose={handleDialogClose} maxWidth="xs" fullWidth>
+        <Stack spacing={2} sx={{ p: 3 }}>
+          <Typography variant="h6">Edit Session</Typography>
+          <Typography variant="subtitle2">Task: {selectedSession?.task_name}</Typography>
+          <Typography variant="subtitle2">Start: {selectedSession ? formatTime(selectedSession.start_ts) : ""}</Typography>
+          <label>
+            Duration (minutes):
+            <input
+              type="number"
+              min={1}
+              value={editDuration}
+              onChange={e => setEditDuration(Number(e.target.value))}
+              style={{ width: 80, marginLeft: 8 }}
+            />
+          </label>
+          <label>
+            Notes:
+            <textarea
+              value={editNotes}
+              onChange={e => setEditNotes(e.target.value)}
+              rows={3}
+              style={{ width: "100%", marginTop: 4 }}
+            />
+          </label>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <button onClick={handleDialogClose}>Cancel</button>
+            <button onClick={handleDialogSave} disabled={loading}>Save</button>
+          </Stack>
+        </Stack>
+      </Dialog>
     </Stack>
   );
 });
